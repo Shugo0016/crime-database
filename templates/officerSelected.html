@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Officer Selected</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <style>
+        #banner {
+            width: 100%;
+            height: 360px;
+            object-fit: cover;
+        }
+
+        body {
+            background-color: #192026;
+            color: white;
+        }
+
+        #container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 20px;
+        }
+
+        h6 {
+            text-decoration: underline;
+            color: blue;
+        }
+
+        table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid white;
+        }
+
+        th,
+        td {
+            border: 1px solid white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #343a40;
+        }
+
+        tr:nth-child(even) {
+            background-color: #212529;
+        }
+
+        .left-side {
+            width: 50%;
+        }
+
+        .left-side h2,
+        .left-side h5 {
+            margin-top: 0;
+        }
+
+        .Subtext {
+            margin: 7px 0 10px 12px;
+            font-family: Inter;
+            font-size: 16px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            line-height: normal;
+            letter-spacing: 1.12px;
+            text-align: left;
+            color: #868686;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Crime Tracker</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{{ url_for('home') }}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('criminal') }}">Criminals</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('officer') }}">Officers</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('crime') }}">Crimes</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <div id="container">
+        <div id="left-side">
+
+
+            {% for row in data %}
+            {% set values = row.values() %}
+            {% set names = row.values()|list %}
+            {% set officer_id = names[0] %}
+            {% set last = names[1] %}
+            {% set first = names[2] %}
+            {% set precinct = names[3] %}
+            {% set badge = names[4] %}
+            {% set phone = names[5] %}
+            {% set o_status = names[6] %}
+
+            {% if o_status == 'A' %}
+            {% set o_status = 'Active' %}
+            {% else %}
+            {% set o_status = 'Inactive' %}
+            {% endif %}
+
+
+            <h2>Officer ID: {{ officer_id }}</h2>
+            <h5>Name:</h5>
+            <h5> <span class="Subtext">{{ first }} {{ last }}</span></h5>
+            <h5>Precinct </h5>
+            <h5> <span class="Subtext"> {{ precinct }} </span></h5>
+            <h5>Phone: </h5>
+            <h5> <span class="Subtext">{{ phone }} </span></h5>
+            <h5>Badge Number: </h5>
+            <h5> <span class="Subtext">{{ badge }}</span></h5>
+            <h5>Officer Status: </h5>
+            <h5> <span class="Subtext">{{ o_status }}</span></h5>
+            {% endfor %}
+
+            <h5>Crime List: </h5>
+            <table>
+                <tr>
+                    <th>Crime ID</th>
+                    <th>Date Charged</th>
+                    <th>Hearing date</th>
+                    <th>Appeal Cutoff Date</th>
+                </tr>
+                <tr>
+                    {% if not data2 %}
+                    <td> N/A </td>
+                    <td> N/A </td>
+                    <td> N/A </td>
+                    <td> N/A </td>
+                    <td> N/A </td>
+                    <td> N/A </td>
+                    {% else %}
+                    {% for row in data2 %}
+                    {% set names = row.values()|list %}
+                    {% set crime_id = names[0] %}
+                    {% set date_charged = names[1] %}
+                    {% set hearing_date = names[2] %}
+                    {% set appeal_cut_off = names[3] %}
+                    <td><a href="/crimeSelected?id={{ crime_id }}">{{ crime_id }}</a></td>
+                    <td>{{ date_charged }}</td>
+                    <td>{{ hearing_date }}</td>
+                    <td>{{ appeal_cut_off }}</td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -138,8 +138,23 @@ def crimeSelected():
     que4 = cur.fetchall()
     columns4 = [desc[0] for desc in cur.description]
 
-
     return render_template('crimeSelected.html', data_for_selected_card=card_id, data=que, columns=columns, data2=que2, columns2=columns2, data3 = que3, columns3 = columns3, data4=que4, columns4=columns4)
+
+@app.route('/officerSelected')
+def officerSelected():
+    card_id = request.args.get('id')
+    # Use the card ID to fetch the data for the selected card
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Officer WHERE officer_ID = %s", (card_id,))
+    que = cur.fetchall()
+    columns = [desc[0] for desc in cur.description]
+
+    cur = conn.cursor()
+    cur.execute("SELECT c.crime_ID, date_charged, hearing_date, appeal_cut_date FROM Crime c, Crime_officer co WHERE co.officer_ID = %s AND c.crime_ID = co.crime_ID", (card_id,))
+    que2 = cur.fetchall()
+    columns2 = [desc[0] for desc in cur.description]
+
+    return render_template('officerSelected.html', data_for_selected_card=card_id, data=que, columns=columns, data2=que2, columns2=columns2)
 
 
 
