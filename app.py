@@ -125,7 +125,21 @@ def crimeSelected():
     cur.execute("SELECT * FROM Crime WHERE crime_ID = %s", (card_id,))
     que = cur.fetchall()
     columns = [desc[0] for desc in cur.description]
-    return render_template('crimeSelected.html', data_for_selected_card=card_id, data=que, columns=columns)
+
+    cur.execute("SELECT * FROM Crime_charges cr, Crime_codes cc WHERE crime_ID = %s AND cr.crime_code = cc.crime_code", (card_id,))
+    que2 = cur.fetchall()
+    columns2 = [desc[0] for desc in cur.description]
+
+    cur.execute("SELECT DISTINCT cr_first, cr_last, cr.criminal_id FROM Criminal cr, Crime c, Crime_charges cc WHERE c.crime_ID = %s AND cc.crime_ID = c.crime_ID AND cr.criminal_ID = c.criminal_ID", (card_id,))
+    que3 = cur.fetchall()
+    columns3 = [desc[0] for desc in cur.description]
+
+    cur.execute("SELECT o_first, o_last, o.officer_ID FROM Officer o, Crime c, Crime_Officer co WHERE c.crime_ID = %s AND co.crime_ID = c.crime_ID AND co.officer_ID = o.officer_ID;", (card_id,))
+    que4 = cur.fetchall()
+    columns4 = [desc[0] for desc in cur.description]
+
+
+    return render_template('crimeSelected.html', data_for_selected_card=card_id, data=que, columns=columns, data2=que2, columns2=columns2, data3 = que3, columns3 = columns3, data4=que4, columns4=columns4)
 
 
 

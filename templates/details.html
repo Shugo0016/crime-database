@@ -147,7 +147,7 @@
                 <th>Violations</th>
               </tr>
               
-            {% if not data3 %}
+            {% if not data3 %} 
               <tr>
                 <td> N/A </td>
                 <td> N/A </td>
@@ -227,8 +227,8 @@
                 {% set a_status = 'Denied' %}
             {% endif %}
 
-              <tr>
-                <td><a href="/page/{{ crime_id }}">{{ crime_id }}</a></td>
+              <tr> 
+                <td><a href="/crimeSelected?id={{ crime_id }}">{{ crime_id }}</a></td>
                 <td>{{ filling_type }}</td>
                 <td>{{ hearing_date }}</td>
                 <td>{{ a_status }}</td>
