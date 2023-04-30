@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 from itertools import zip_longest
 import pymysql.cursors
 import json
+import random
 import cryptography
 
 app = Flask(__name__)
@@ -172,6 +173,33 @@ def add():
     cur.close()
     return redirect(url_for('index'))
 
+@app.route('/add_data', methods=['POST'])
+def add_data():
+    
+    random_number = random.randint(100000,999999)
+    f_name = request.form['fname'].strip()
+    l_name = request.form['lname'].strip()
+    address = request.form['address'].strip()
+    state = request.form['state'].strip()
+    city = request.form['city'].strip()
+    phone = request.form['phone'].strip()
+    zip = request.form['zip'].strip()
+    v_stat = request.form['vstatus'].strip()
+    p_stat = request.form['pstatus'].strip()
+    print(p_stat)
+    
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Criminal WHERE cr_first = %s AND cr_last = %s AND cr_street = %s AND cr_state = %s AND cr_city = %s AND cr_phone = %s AND cr_zip = %s AND v_status = %s AND p_status = %s", (f_name, l_name, address, state, city, phone, zip, v_stat, p_stat))
+    result = cur.fetchone()
+    if result is None:
+    # Data is not already in database, so insert it
+        cur.execute("INSERT INTO Criminal (criminal_ID, cr_last, cr_first, cr_street, cr_city, cr_state, cr_zip, cr_phone, v_status, P_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (random_number, l_name, f_name, address, city, state, zip, phone, v_stat, p_stat))
+        conn.commit()
+        return "Data added successfully!"
+    else:
+        # Data is already in database, so do not insert it again
+        flash('Criminal Already Exists')
+        return redirect(url_for('criminal'))
 
 # SELECT QUERIES
 @app.route("/catselect", methods=["POST"])
