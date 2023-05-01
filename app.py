@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from itertools import zip_longest
+from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql.cursors
 import json
 import random
@@ -166,13 +167,54 @@ def add():
     lname = request.form['lname']
     email = request.form['createEmail']
     password = request.form['pwd']
+    password_hash = generate_password_hash(password)
     cur = conn.cursor()
     # check_db_connection()  # Call the check_db_connection function before executing the SQL query
-    cur.execute("INSERT INTO users (firstname, lastname, user_email, password) VALUES (%s, %s, %s, %s)", (fname, lname, email, password))
+    cur.execute("INSERT INTO users (firstname, lastname, user_email, password) VALUES (%s, %s, %s, %s)", (fname, lname, email, password_hash))
     conn.commit()
     cur.close()
     return redirect(url_for('index'))
 
+
+# Define the search results route
+@app.route('/search', methods=['POST'])
+def search():
+    # Get the search criteria from the form
+    id = request.form['queryID']
+    first = request.form['queryFirst']
+    last = request.form['queryLast']
+    
+
+    # Execute the search query
+    query = "SELECT criminal_ID, cr_last, cr_first, cr_city, cr_state FROM Criminal WHERE 1=1"
+    params = []
+
+    if id != "":
+        query += " AND criminal_ID = %s"
+        params.append(id)
+
+    if first != "":
+        query += " AND cr_first LIKE %s"
+        params.append("%" + first + "%")
+
+    if last != "":
+        query += " AND cr_last LIKE %s"
+        params.append("%" + last + "%")
+
+# Execute the search query
+    cur = conn.cursor()
+    cur.execute(query, params)
+    results = cur.fetchall()
+    # results = query
+
+
+    return search_results_page(results)
+
+@app.route('/search_results')
+def search_results_page(data):
+    return render_template('search_results.html', data=data)
+
+# ADD CRIMINAL TO DATABASE
 @app.route('/add_data', methods=['POST'])
 def add_data():
     
@@ -212,15 +254,34 @@ def authenticate():
     uemail = request.form['InputEmail'];
     upass = request.form['passwordIn'];
     cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE user_email = %s AND password = %s", (uemail, upass))
+    cur.execute("SELECT password FROM users WHERE user_email = %s", (uemail,))
     result = cur.fetchone()
-    cur.close()
-    if result is None:
-        # If the user does not exist or the password is incorrect, show an error message and redirect back to the login page
-        flash('Invalid email or password')
-        return redirect(url_for('index'))
+    print(result)
+    if result is not None:
+        hashed_password = result['password']
+        if check_password_hash(hashed_password, upass):
+            # User is authenticated, allow login
+            return redirect(url_for('home'))
+        else:
+            flash('Invalid password')
+            return redirect(url_for('index'))
     else:
-        return redirect(url_for('home'))
+        flash('Invalid username')
+        return redirect(url_for('index'))
+            
+    
+    
+    # cur.execute("SELECT * FROM users WHERE user_email = %s AND password = %s", (uemail, upass))
+    # result = cur.fetchone()
+    # cur.close()
+    # if result is None:
+    #     # If the user does not exist or the password is incorrect, show an error message and redirect back to the login page
+        
+        
+    # else:
+    #     return redirect(url_for('home'))
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
