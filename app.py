@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from itertools import zip_longest
 from werkzeug.security import generate_password_hash, check_password_hash
+
 import pymysql.cursors
 import json
 import random
@@ -26,6 +27,7 @@ conn = pymysql.connect(host=app.config['APP_HOST'],
                         db=app.config['APP_DB'],
                         charset=app.config['CHARSET'],
                         cursorclass = pymysql.cursors.DictCursor)
+
 
 
 def check():
@@ -70,6 +72,13 @@ def criminal():
     columns = [desc[0] for desc in cur.description]
     return render_template('criminal.html', data=data, columns=columns)
 
+@app.route('/probation')
+def probation():
+    cur = conn.cursor()
+    cur.execute("SELECT prob_ID, pr_last, pr_first, pr_city, pr_state FROM Prob_Officers")
+    data = cur.fetchall()
+    columns = [desc[0] for desc in cur.description]
+    return render_template('prob_officer.html', data=data, columns=columns)
 
 
 @app.route('/crime')
@@ -158,6 +167,23 @@ def officerSelected():
 
     return render_template('officerSelected.html', data_for_selected_card=card_id, data=que, columns=columns, data2=que2, columns2=columns2)
 
+@app.route('/probationSelected')
+def probationSelected():
+    card_id = request.args.get('id')
+    # Use the card ID to fetch the data for the selected card
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Prob_officers WHERE prob_ID = %s", (card_id,))
+    que = cur.fetchall()
+    columns = [desc[0] for desc in cur.description]
+
+    cur = conn.cursor()
+    cur.execute("SELECT sentence_ID, criminal_ID, type, start_date, end_date, violations FROM Sentences s, Prob_officers p WHERE s.prob_ID = p.prob_ID AND p.prob_ID = %s",(card_id,))
+    que2 = cur.fetchall()
+    columns2 = [desc[0] for desc in cur.description]
+   
+
+    return render_template('probationSelected.html',data_for_selected_card=card_id, data=que, columns=columns, data2=que2, columns2=columns2)
+
 
 
 # ADD / DELETE QUERIES
@@ -207,12 +233,93 @@ def search():
     results = cur.fetchall()
     # results = query
 
-
     return search_results_page(results)
+
+
+@app.route('/searchOfficer', methods=['POST'])
+def searchOfficer():
+    # Get the search criteria from the form
+    id = request.form['queryID']
+    first = request.form['queryFirst']
+    last = request.form['queryLast']
+    precinct = request.form['queryPrecinct']
+    
+    # Execute the search query
+    query = "SELECT officer_ID, o_last, o_first, precinct FROM Officer WHERE 1=1"
+    params = []
+
+    if id != "":
+        query += " AND officer_ID = %s"
+        params.append(id)
+
+    if first != "":
+        query += " AND o_first LIKE %s"
+        params.append("%" + first + "%")
+
+    if last != "":
+        query += " AND o_last LIKE %s"
+        params.append("%" + last + "%")
+    
+    if precinct != "":
+        query += " AND precinct LIKE %s"
+        params.append("%" + precinct + "%")
+
+# Execute the search query
+    cur = conn.cursor()
+    cur.execute(query, params)
+    results = cur.fetchall()
+    # results = query
+
+    return search_officer_page(results)
+
+@app.route('/searchCrime', methods=['POST'])
+def searchCrime():
+    # Get the search criteria from the form
+    id = request.form['queryID']
+    first = request.form['queryClass']
+    last = request.form['queryDate']
+    precinct = request.form['queryStatus']
+    
+    # Execute the search query
+    query = "SELECT crime_ID, classification, date_charged, c_status FROM Crime WHERE 1=1"
+    params = []
+
+    if id != "":
+        query += " AND crime_ID = %s"
+        params.append(id)
+
+    if first != "":
+        query += " AND classification LIKE %s"
+        params.append("%" + first + "%")
+
+    if last != "":
+        query += " AND date_charged LIKE %s"
+        params.append("%" + last + "%")
+    
+    if precinct != "":
+        query += " AND c_status LIKE %s"
+        params.append("%" + precinct + "%")
+
+# Execute the search query
+    cur = conn.cursor()
+    cur.execute(query, params)
+    results = cur.fetchall()
+    # results = query
+
+    return search_crime_page(results)
+
 
 @app.route('/search_results')
 def search_results_page(data):
     return render_template('search_results.html', data=data)
+
+@app.route('/search_officer_results')
+def search_officer_page(data):
+    return render_template('search_officer.html', data=data)
+
+@app.route('/search_crime_results')
+def search_crime_page(data):
+    return render_template('search_crime.html', data=data)
 
 # ADD CRIMINAL TO DATABASE
 @app.route('/add_data', methods=['POST'])
@@ -270,16 +377,6 @@ def authenticate():
         return redirect(url_for('index'))
             
     
-    
-    # cur.execute("SELECT * FROM users WHERE user_email = %s AND password = %s", (uemail, upass))
-    # result = cur.fetchone()
-    # cur.close()
-    # if result is None:
-    #     # If the user does not exist or the password is incorrect, show an error message and redirect back to the login page
-        
-        
-    # else:
-    #     return redirect(url_for('home'))
     
 
 

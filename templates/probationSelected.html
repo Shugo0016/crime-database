@@ -116,40 +116,53 @@
             {% set officer_id = names[0] %}
             {% set last = names[1] %}
             {% set first = names[2] %}
-            {% set precinct = names[3] %}
-            {% set badge = names[4] %}
-            {% set phone = names[5] %}
-            {% set o_status = names[6] %}
+            {% set street = names[3] %}
+            {% set city = names[4] %}
+            {% set state = names[5] %}
+            {% set zip = names[6] %}
+            {% set phone = names[7] %}
+            {% set email = names[8] %}
+            {% set status = names[9] %}
 
-            {% if o_status == 'A' %}
-            {% set o_status = 'Active' %}
+            {% if status == 'A' %}
+            {% set status = 'Active' %}
             {% else %}
-            {% set o_status = 'Inactive' %}
+            {% set status = 'Inactive' %}
             {% endif %}
 
 
             <h2>Officer ID: {{ officer_id }}</h2>
             <h5>Name:</h5>
             <h5> <span class="Subtext">{{ first }} {{ last }}</span></h5>
-            <h5>Precinct </h5>
-            <h5> <span class="Subtext"> {{ precinct }} </span></h5>
+            <h5>Street </h5>
+            <h5> <span class="Subtext"> {{ street }} </span></h5>
+            <h5>City: </h5>
+            <h5> <span class="Subtext">{{ city }} </span></h5>
+            <h5>State: </h5>
+            <h5> <span class="Subtext">{{ state }}</span></h5>
+            <h5>Zip: </h5>
+            <h5> <span class="Subtext">{{ zip }}</span></h5>
             <h5>Phone: </h5>
-            <h5> <span class="Subtext">{{ phone }} </span></h5>
-            <h5>Badge Number: </h5>
-            <h5> <span class="Subtext">{{ badge }}</span></h5>
-            <h5>Officer Status: </h5>
-            <h5> <span class="Subtext">{{ o_status }}</span></h5>
+            <h5> <span class="Subtext">{{ phone }}</span></h5>
+            <h5>Email: </h5>
+            <h5> <span class="Subtext">{{ email }}</span></h5>
+            <h5>Status: </h5>
+            <h5> <span class="Subtext">{{ status }}</span></h5>
+
             {% endfor %}
 
-            <h5>Crime List: </h5>
+            <h5>Involved Sentences: </h5>
             <table>
                 <tr>
-                    <th>Crime ID</th>
-                    <th>Date Charged</th>
-                    <th>Hearing date</th>
-                    <th>Appeal Cutoff Date</th>
+                    <th>Sentence ID</th>
+                    <th>Criminal_ID</th>
+                    <th>Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Violations </th>
                 </tr>
                 <tr>
+
                     {% if not data2 %}
                     <td> N/A </td>
                     <td> N/A </td>
@@ -160,14 +173,19 @@
                     {% else %}
                     {% for row in data2 %}
                     {% set names = row.values()|list %}
-                    {% set crime_id = names[0] %}
-                    {% set date_charged = names[1] %}
-                    {% set hearing_date = names[2] %}
-                    {% set appeal_cut_off = names[3] %}
-                    <td><a href="/crimeSelected?id={{ crime_id }}">{{ crime_id }}</a></td>
-                    <td>{{ date_charged }}</td>
-                    <td>{{ hearing_date }}</td>
-                    <td>{{ appeal_cut_off }}</td>
+                    {% set sentence_id = names[0] %}
+                    {% set criminal_id = names[1] %}
+                    {% set type = names[2] %}
+                    {% set start_date = names[3] %}
+                    {% set end_date = names[4] %}
+                    {% set violations = names[5] %}
+
+                    <td>{{ sentence_id }}</a></td>
+                    <td><a href="/details?id={{ criminal_id }}">{{ criminal_id }}</a></td>
+                    <td>{{ type }}</td>
+                    <td>{{ start_date }}</td>
+                    <td>{{ end_date }}</td>
+                    <td>{{ violations }}</td>
                 </tr>
                 {% endfor %}
                 {% endif %}

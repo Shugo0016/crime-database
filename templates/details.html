@@ -108,6 +108,9 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('crime') }}">Crimes</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('probation') }}">Probation</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -222,7 +225,7 @@
             <tr>
               <td>{{ s_id }}</td>
               <td>{{ s_type }}</td>
-              <td><a href="/page/{{ p_id }}">{{ p_id }}</a></td>
+              <td><a href="/probationSelected?id={{ p_id }}">{{ p_id }}</a></td>
               <td>{{ s_date }}</td>
               <td>{{ e_date }}</td>
               <td>{{ violat }}</td>
